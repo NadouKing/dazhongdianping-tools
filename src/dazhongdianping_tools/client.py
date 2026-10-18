@@ -182,9 +182,26 @@ class DianpingClient:
             else ".shopName, h1.shop-name, .addressText"
         )
         await self._navigate(url, selector)
-        data = await self.browser.cdp.evaluate(
-            f"{self._reader}({json.dumps(kind)}, {limit})", self._session_id
+        # A late redirect can replace a ready shop page between navigation and parsing.
+        # Capture page identity/gates and parsed data in the same JavaScript evaluation.
+        snapshot = await self.browser.cdp.evaluate(
+            "(() => ({url:location.href,title:document.title,"
+            "body:(document.body?.innerText||'').slice(0,4000),data:"
+            f"{self._reader}({json.dumps(kind)}, {limit})" + "}))()",
+            self._session_id,
         )
+        if not isinstance(snapshot, dict):
+            raise DianpingError("parser_unavailable", "点评页面结构未识别。")
+        status = page_status(
+            snapshot.get("url", ""), snapshot.get("title", ""), snapshot.get("body", "")
+        )
+        if status == "verification_required":
+            raise DianpingError(status, "点评要求人工验证，请运行 dp login 并在浏览器中完成。")
+        if status == "login_required":
+            raise DianpingError(status, "点评需要重新登录，请运行 dp login。")
+        if status != "ready":
+            raise DianpingError("navigation_failed", "点评页面跳转到无法识别的位置。")
+        data = snapshot.get("data")
         if kind == "search":
             if not isinstance(data, dict) or not isinstance(data.get("items"), list):
                 raise DianpingError("parser_unavailable", "点评搜索页面结构未识别。")

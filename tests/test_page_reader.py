@@ -3,10 +3,12 @@
 import asyncio
 import json
 from importlib.resources import files
+from types import SimpleNamespace
 
 import pytest
 
 from dazhongdianping_tools.browser import ChromeBrowser, chrome_executable
+from dazhongdianping_tools.client import DianpingClient
 from dazhongdianping_tools.errors import DianpingError
 
 
@@ -80,6 +82,46 @@ def test_dom_reader_and_canonical_urls_in_temporary_chrome(tmp_path):
             assert "never-export" not in json.dumps(search)
             empty = await read('<div class="shop-list-empty">没有找到相关商户</div>', "search")
             assert empty == {"items": [], "emptyState": True}
+
+            # Execute the production snapshot expression in real Chrome, including
+            # a late gate that replaced an otherwise valid-looking detail document.
+            for href, title, expected in [
+                ("https://www.dianping.com/shop/shop123", "商家", None),
+                (
+                    "https://verify.meituan.com/v2/app/general_page",
+                    "验证中心",
+                    "verification_required",
+                ),
+            ]:
+
+                class FixtureCdp:
+                    async def evaluate(self, expression, _, *, title=title, href=href):
+                        wrapped = (
+                            "(function(document,location){return " + expression + ";})("
+                            "new DOMParser().parseFromString("
+                            + json.dumps(
+                                "<title>" + title + '</title><h1 class="shopName">示例</h1>'
+                            )
+                            + ",'text/html'),"
+                            + json.dumps({"href": href, "pathname": "/shop/shop123"})
+                            + ")"
+                        )
+                        return await browser.cdp.evaluate(wrapped, session)
+
+                client = DianpingClient()
+                client.browser = SimpleNamespace(cdp=FixtureCdp())
+                client._session_id = session
+
+                async def navigate(*_):
+                    pass
+
+                client._navigate = navigate
+                if expected:
+                    with pytest.raises(DianpingError) as error:
+                        await client.detail("shop123")
+                    assert error.value.code == expected
+                else:
+                    assert (await client.detail("shop123"))["data"]["id"] == "shop123"
         finally:
             await browser.close()
             await browser.close()

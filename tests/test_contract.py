@@ -73,7 +73,12 @@ class FakeCdp:
         self.parsed = parsed
 
     async def evaluate(self, *_):
-        return self.parsed
+        return {
+            "url": "https://www.dianping.com/shop/shop123",
+            "title": "商家",
+            "body": "",
+            "data": self.parsed,
+        }
 
 
 def client_with_parsed(parsed):
@@ -133,6 +138,41 @@ def test_missing_reviews_means_not_visible_on_page():
         result = await client_with_parsed(parsed).detail("shop123")
         assert result["data"]["reviewsStatus"] == "not_visible_on_page"
         assert result["data"]["reviewCount"] == "84条"
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize(
+    "url,title,expected",
+    [
+        (
+            "https://verify.meituan.com/v2/app/general_page?token=fixture-secret",
+            "验证中心",
+            "verification_required",
+        ),
+        ("https://account.meituan.com/login?token=fixture-secret", "登录", "login_required"),
+        ("https://unrelated.invalid/?token=fixture-secret", "", "navigation_failed"),
+    ],
+)
+def test_late_redirect_is_classified_from_same_snapshot_before_parsing(url, title, expected):
+    async def run():
+        client = client_with_parsed(None)
+
+        async def evaluate(expression, *_):
+            assert "location.href" in expression and "data:" in expression
+            # Even old-looking valid data must not turn a gate into a successful read.
+            return {
+                "url": url,
+                "title": title,
+                "body": "",
+                "data": {"id": "shop123", "name": "旧页面名称"},
+            }
+
+        client.browser.cdp.evaluate = evaluate
+        with pytest.raises(DianpingError) as error:
+            await client.detail("shop123")
+        assert error.value.code == expected
+        assert "fixture-secret" not in str(error.value)
 
     asyncio.run(run())
 
