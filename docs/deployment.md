@@ -10,7 +10,9 @@ The default state path follows the OS: Windows `%LOCALAPPDATA%`, macOS `~/Librar
 
 ## One environment for the travel application
 
-An integrating application pins this repository's verified commit/version as a Python dependency. Its own `uv.lock` resolves this package, Xiaohongshu tools and shared dependencies into one `.venv`. Tool repository development locks describe independent development; they do not force users to create multiple environments. Do not configure production imports through absolute checkout paths or `PYTHONPATH`.
+This package works alone: clone only this repository and run `uv sync --locked`, or install its built wheel into a Python 3.14 environment. Both the library and `dp` CLI are independent entry points. No other platform package or travel application is required.
+
+An integrating application may pin this repository's verified commit/version as a Python dependency and share its own `.venv`. It owns business adaptation, while this tool owns the platform contract. Tool repository development locks do not force application users to create multiple environments. Do not configure production imports through absolute checkout paths or `PYTHONPATH`.
 
 ## Session operation
 
@@ -28,11 +30,9 @@ uv run ruff check .
 uv run ruff format --check .
 uv run pytest -q
 uv build
-uv venv --python 3.14 <temporary-clean-environment>
-uv pip install --python <clean-python> dist/dazhongdianping_tools-0.1.0-py3-none-any.whl
-<clean-python> -I scripts/smoke_installed_wheel.py
+uv run python scripts/smoke_installed_wheel.py dist/dazhongdianping_tools-0.1.0-py3-none-any.whl
 ```
 
-The smoke script runs children from a temporary directory and removes `PYTHONPATH`; it checks installed import, packaged JavaScript, CLI help, and JSON error behavior without starting Chrome. Run live acceptance separately with an explicitly supplied dedicated profile. Never publish the browser state with the wheel or evidence.
+The smoke script creates a temporary clean environment, installs only the supplied wheel and declared dependencies, removes `PYTHONPATH` and runs isolated children outside the checkout. It checks installed import, packaged JavaScript, the console entry point and JSON errors without starting Chrome, and verifies no consumer application or other platform tool is installed. CI runs the same check. Run live acceptance separately with an explicitly supplied dedicated profile. Never publish browser state with the wheel or evidence.
 
 `docs/evidence/live-2026-10-18.json` is a sanitized historical sample, not fresh travel advice. The current official-map/weather integration belongs to the main application and is not replaced by this deployment.
