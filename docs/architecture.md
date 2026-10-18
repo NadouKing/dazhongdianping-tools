@@ -16,6 +16,10 @@ Search navigates to `/search/keyword/<city>/0_<keyword>`. Detail navigates to th
 
 The current DOM path is intentional. A prior page-context `fetch` experiment returned 403. A future direct request path needs observed success, response validation, and fair latency/completeness measurements before replacing this path. CDP is a transport, not a guarantee of fewer network requests.
 
+Navigation readiness is not a promise that the document cannot redirect again. The read operation captures page URL/title/gate text and parsed data in a single JavaScript evaluation. It classifies a late verification/login redirect before validating or returning fields; private snapshot text is not part of public output. A real Chrome synthetic fixture covers this expression and live acceptance records the observed verification state.
+
+Optional `verification_wait` requires a visible browser and defaults to zero. Search/detail can observe the same target tab while the owner completes login/verification. A single bounded deadline covers navigation gates and late snapshot gates, including in-flight state probes. Resumption requires the original target path and expected loaded elements; parsing still checks gate status atomically and validates the shop ID. It never retries navigation or refreshes a blocked page.
+
 ## Contract and limits
 
 Success: `schemaVersion/status/source/fetchedAt/method/elapsedMs/data`. Errors: typed `DianpingError(code,message)`; CLI serializes a safe error envelope and exits nonzero. The project preserves raw localized prices, scores and business hints. Consumers decide how to normalize them and must retain source timestamps.

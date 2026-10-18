@@ -1,0 +1,45 @@
+{
+  "maintenance": "final snapshot; owner will archive; not archived by this task",
+  "runtimeCommit": "6a248a69252513994131df4d77e322148559d3a3",
+  "checks": {
+    "python": "3.14.8",
+    "pytest": 53,
+    "ruff": "passed",
+    "format": "passed",
+    "wheelBuild": "passed",
+    "independentInstalledWheel": "passed"
+  },
+  "live": {
+    "checkedAt": "2026-10-18T15:07:34.940175+00:00",
+    "runtimeCommit": "6a248a69252513994131df4d77e322148559d3a3",
+    "mode": "visible",
+    "manualWaitSeconds": 30,
+    "navigationAttempts": 1,
+    "shopId": "l4cKpuMdkud8e4wY",
+    "status": "detail_read",
+    "identityMatches": true,
+    "hasName": true,
+    "hasAddress": true,
+    "hasRating": true,
+    "hasPrice": true,
+    "hasOpeningHint": true,
+    "reviewsStatus": "not_visible_on_page",
+    "readReviewCount": 0,
+    "elapsedMs": 5139,
+    "browserClosed": true
+  },
+  "manualWaitTests": [
+    "same target resumption with one navigation",
+    "late gate resumption",
+    "persistent gate timeout",
+    "wrong target timeout",
+    "cancel slow state probe",
+    "reject headless wait through library and CLI"
+  ],
+  "limits": [
+    "The final live read did not encounter a gate; gate transition/deadline behavior was verified with controlled tests.",
+    "The preceding visible session was manually verified by the owner; success is not a guarantee for another page or session.",
+    "No review text was visible; zero read samples does not mean no reviews.",
+    "Source comparison is code review, not execution of upstream projects."
+  ]
+}

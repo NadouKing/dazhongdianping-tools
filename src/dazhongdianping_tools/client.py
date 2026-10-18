@@ -97,14 +97,24 @@ class DianpingClient:
         headless=True,
         timeout=30.0,
         min_interval=2.0,
+        verification_wait=0.0,
     ):
         if not isinstance(timeout, (int, float)) or not 1 <= timeout <= 600:
             raise DianpingError("invalid_timeout", "timeout 必须在 1 至 600 秒之间。")
         if not isinstance(min_interval, (int, float)) or min_interval < 0:
             raise DianpingError("invalid_interval", "请求间隔不能为负数。")
+        if (
+            isinstance(verification_wait, bool)
+            or not isinstance(verification_wait, (int, float))
+            or not 0 <= verification_wait <= 600
+        ):
+            raise DianpingError("invalid_timeout", "人工验证等待须在 0 至 600 秒之间。")
+        if verification_wait and headless:
+            raise DianpingError("visible_browser_required", "人工验证等待需要可见浏览器。")
         self.browser = ChromeBrowser(profile_dir, chrome_path, headless, float(timeout))
         self.timeout = float(timeout)
         self.min_interval = float(min_interval)
+        self.verification_wait = float(verification_wait)
         self._serial = asyncio.Lock()
         self._last_navigation = 0.0
         self._session_id = None
@@ -163,7 +173,7 @@ class DianpingClient:
                         status,
                         "点评需要重新登录，请运行 dp login。"
                         if status == "login_required"
-                        else "点评要求人工验证，请运行 dp login 并在浏览器中完成。",
+                        else "需要人工验证，可用 --visible --verification-wait 180 在原页等待。",
                     )
                 committed = urlsplit(state.get("url", "")).path == wanted_path
                 if committed and status == "ready":
@@ -175,16 +185,69 @@ class DianpingClient:
             await asyncio.sleep(0.2)
         raise DianpingError("navigation_timeout", "等待点评页面加载超时。")
 
+    async def _wait_for_target(self, url: str, selector: str, deadline: float):
+        """Observe the existing tab while its owner acts; never refresh or navigate."""
+        try:
+            async with asyncio.timeout(max(0, deadline - time.monotonic())):
+                while True:
+                    try:
+                        state = await self._state(selector)
+                    except DianpingError as error:
+                        if error.code not in {"cdp_error", "page_evaluation_failed"}:
+                            raise
+                        state = None
+                    if (
+                        state
+                        and page_status(
+                            state.get("url", ""), state.get("title", ""), state.get("body", "")
+                        )
+                        == "ready"
+                        and urlsplit(state.get("url", "")).path == urlsplit(url).path
+                        and state.get("found")
+                        and state.get("ready") != "loading"
+                    ):
+                        return
+                    await asyncio.sleep(0.5)
+        except TimeoutError:
+            raise DianpingError(
+                "verification_timeout", "等待人工验证超时，原有登录目录已保留。"
+            ) from None
+
     async def _read(self, url: str, kind: str, limit: int):
         selector = (
             "#shop-all-list li, .shop-list li, .shop-list-empty, .search-empty"
             if kind == "search"
             else ".shopName, h1.shop-name, .addressText"
         )
-        await self._navigate(url, selector)
-        data = await self.browser.cdp.evaluate(
-            f"{self._reader}({json.dumps(kind)}, {limit})", self._session_id
-        )
+        deadline = None
+        try:
+            await self._navigate(url, selector)
+        except DianpingError as error:
+            if (
+                error.code not in {"login_required", "verification_required"}
+                or not self.verification_wait
+            ):
+                raise
+            deadline = time.monotonic() + self.verification_wait
+            await self._wait_for_target(url, selector, deadline)
+        while True:
+            snapshot = await self._snapshot(kind, limit)
+            status = page_status(
+                snapshot.get("url", ""), snapshot.get("title", ""), snapshot.get("body", "")
+            )
+            if status not in {"login_required", "verification_required"}:
+                break
+            if not self.verification_wait:
+                raise DianpingError(
+                    status,
+                    "需要人工登录或验证；用 --visible --verification-wait 180 在原页等待。",
+                )
+            if deadline is None:
+                deadline = time.monotonic() + self.verification_wait
+            await self._wait_for_target(url, selector, deadline)
+        if status != "ready":
+            raise DianpingError("navigation_failed", "点评页面跳转到无法识别的位置。")
+        data = snapshot.get("data")
         if kind == "search":
             if not isinstance(data, dict) or not isinstance(data.get("items"), list):
                 raise DianpingError("parser_unavailable", "点评搜索页面结构未识别。")
@@ -198,6 +261,19 @@ class DianpingClient:
         if data.get("id") != url.rsplit("/", 1)[-1]:
             raise DianpingError("shop_identity_mismatch", "返回页面与请求门店不一致。")
         return data
+
+    async def _snapshot(self, kind: str, limit: int) -> dict:
+        # A late redirect can replace a ready shop page between navigation and parsing.
+        # Capture page identity/gates and parsed data in the same JavaScript evaluation.
+        snapshot = await self.browser.cdp.evaluate(
+            "(() => ({url:location.href,title:document.title,"
+            "body:(document.body?.innerText||'').slice(0,4000),data:"
+            f"{self._reader}({json.dumps(kind)}, {limit})" + "}))()",
+            self._session_id,
+        )
+        if not isinstance(snapshot, dict):
+            raise DianpingError("parser_unavailable", "点评页面结构未识别。")
+        return snapshot
 
     async def search(self, keyword: str, *, limit: int = 20, city: str | int = "广州") -> dict:
         if not isinstance(keyword, str) or not keyword.strip() or len(keyword) > 200:

@@ -22,6 +22,12 @@ def parser() -> argparse.ArgumentParser:
     root.add_argument("--chrome-path", help="Chrome 可执行文件；也可设置 DP_CHROME_PATH")
     root.add_argument("--timeout", type=float, default=30, help="浏览器/页面超时秒数")
     root.add_argument("--visible", action="store_true", help="显示专用浏览器窗口")
+    root.add_argument(
+        "--verification-wait",
+        type=float,
+        default=0,
+        help="遇人工验证时在原页面等待的秒数（0–600，须 --visible）",
+    )
     commands = root.add_subparsers(dest="command", required=True)
     search = commands.add_parser("search", help="按城市、关键词搜索商家")
     search.add_argument("keyword")
@@ -42,6 +48,7 @@ async def run(args):
         chrome_path=args.chrome_path,
         headless=not (args.visible or args.command == "login"),
         timeout=args.timeout,
+        verification_wait=args.verification_wait,
     ) as client:
         if args.command == "search":
             return await client.search(args.keyword, city=args.city, limit=args.limit)

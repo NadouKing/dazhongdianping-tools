@@ -1,6 +1,10 @@
 # Repository instructions
 
-This is `dazhongdianping-tools`, an independent Python 3.14 package and `dp` CLI for read-only Dianping collection. It is a library dependency of `lazy-trip`, not an agent host or map/weather provider.
+Maintenance ended by owner decision on 2026-10-18. This PR is the final maintenance snapshot pending owner archival. Do not schedule ongoing feature work or re-add it to lazy-trip.
+
+Before any change, read `docs/development-delivery.md`; create/sync the task branch first. Every feature/fix needs relevant live read-only acceptance, updated evidence and a draft PR attached to the chat. Use `.github/PULL_REQUEST_TEMPLATE.md`, handle reviews with `docs/review.md`, and do not merge before the user's explicit request.
+
+This is `dazhongdianping-tools`, an independent Python 3.14 library and `dp` CLI for read-only Dianping collection. Both must install and work alone. Applications may depend on it; business adaptation belongs in the consumer.
 
 ## Boundaries and layers
 
@@ -11,7 +15,7 @@ This is `dazhongdianping-tools`, an independent Python 3.14 package and `dp` CLI
 - `browser.py`: owns one exact dedicated Chrome process, profile lock and idempotent cleanup. Never terminate processes by name or attach to a user's daily browser.
 - `errors.py`: typed, credential-safe library errors. Do not return raw Chrome errors, request headers, cookies or signed URLs to CLI users.
 
-Main application imports this package directly. Do not add a dependency on `lazy-trip` or Xiaohongshu tools. Official Amap/weather remains the main application's existing MCP connection.
+Consumer applications may import this package directly; lazy-trip has retired this dependency. Do not add a dependency on `lazy-trip` or Xiaohongshu tools. Official Amap/weather remains the main application's existing MCP connection.
 
 ## Data and session rules
 
@@ -26,8 +30,8 @@ Main application imports this package directly. Do not add a dependency on `lazy
 
 Use `uv sync --locked`; then `uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -q`. For changes to loading, parsing or profile lifecycle, test relevant failure cases as well as successful data.
 
-Build with `uv build`. Install the wheel into a clean environment, clear `PYTHONPATH`, and run `scripts/smoke_installed_wheel.py` outside the checkout. This catches missing package resources and accidental source imports.
+Build with `uv build`, then run `scripts/smoke_installed_wheel.py WHEEL`. It installs only the wheel and its dependencies into a clean environment, clears `PYTHONPATH`, and checks outside the checkout. This catches missing resources, accidental source imports and coupling to another package.
 
 Live tests are opt-in and serial for a given profile. Use only an explicitly supplied dedicated directory; always close in `finally`/`async with`. Retain a sanitized acceptance summary, not private browser material. Documentation-only edits do not need another live platform request.
 
-Update README/contracts when behavior changes. Keep new integrations small and justified by an actual gap. The engineering structure is inspired by seller-ops-automation; its seller operations, credentials and approval rules do not apply here.
+Update README/contracts when behavior changes. Keep new integrations small and justified by an actual gap.
