@@ -119,7 +119,7 @@ wheel 烟测自动创建干净环境，只安装本包和声明依赖，从源�
 
 ## 参考与许可
 
-每次改动按[开发与PR交付](docs/development-delivery.md)建分支、验证并提交草稿PR，审查见[处理规则](docs/review.md)。本轮保持运行能力不变，其他项目的候选能力见[维护检查](docs/upstream-review-2026-10-18.md)。
+每次改动按[开发与PR交付](docs/development-delivery.md)建分支、验证并提交草稿PR，审查见[处理规则](docs/review.md)。其他项目的候选能力见[维护检查](docs/upstream-review-2026-10-18.md)；独立安装、真实读取和后续验证门禁修复见[独立性验收](docs/standalone-acceptance-2026-10-18.json)。该记录区分先前成功详情与当前需人工验证的状态。
 
 平台读取经验参考 [dp-mcp](https://github.com/qianwj/dp-mcp)；本项目独立实现 Python 传输和生命周期，不需要 Node/Playwright 运行时。
 

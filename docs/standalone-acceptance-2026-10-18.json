@@ -1,0 +1,86 @@
+{
+  "scope": "standalone library/CLI, late redirect classification",
+  "testedCodeSha": "723f95502edaa87ebc0b91a59f4caf750e67bc63",
+  "localTests": 46,
+  "isolatedWheelSmoke": {
+    "passed": true,
+    "consumerInstalled": false,
+    "otherPlatformInstalled": false,
+    "packagedJavaScript": true
+  },
+  "earlierStandaloneLive": {
+    "type": "independent-installed-read-only-acceptance",
+    "startedAt": "2026-10-18T14:04:30.461301+00:00",
+    "testedCodeSha": "0b2fce41dd4bbd48cb92af85b36dac54034680de",
+    "python": "3.14.8",
+    "package": "dazhongdianping-tools",
+    "version": "0.1.0",
+    "wheelSha256": "f5bf4c1ecdedcebd9f39bfa23b7ce274571b7d97c7a8e44a265464a9660c3653",
+    "installedOutsideSource": true,
+    "consumerInstalled": false,
+    "otherPlatformInstalled": false,
+    "pythonIsolation": true,
+    "configuration": "explicit dedicated profile; no Trip configuration",
+    "cli": {
+      "command": "search --limit 5",
+      "count": 5,
+      "elapsedMs": 3466,
+      "publicOutputRedacted": true
+    },
+    "session": {
+      "state": "ready",
+      "authenticated": true
+    },
+    "library": {
+      "searchCount": 5,
+      "searchElapsedMs": 1575,
+      "details": [
+        {
+          "id": "l4cKpuMdkud8e4wY",
+          "hasName": true,
+          "hasAddress": true,
+          "reviewSampleCount": 0,
+          "reviewsStatus": "not_visible_on_page",
+          "elapsedMs": 3997
+        }
+      ]
+    },
+    "completedAt": "2026-10-18T14:04:43.782963+00:00",
+    "passed": true,
+    "browserClosed": true
+  },
+  "currentLive": {
+    "startedAt": "2026-10-18T14:20:58.431665+00:00",
+    "completedAt": "2026-10-18T14:21:13.092216+00:00",
+    "sourceCodeSha": "723f95502edaa87ebc0b91a59f4caf750e67bc63",
+    "searchCount": 5,
+    "detailCount": 0,
+    "outcome": "verification_required",
+    "note": "Earlier standalone detail succeeded. The later detail redirected to the verification center. No claim of current full detail success."
+  },
+  "regression": {
+    "before": "late redirect after navigation readiness was classified as parser_unavailable",
+    "after": "page identity/title/body and parsed data captured in one Runtime.evaluate; verification_required preserved",
+    "fixtures": "real local Chrome executes the production snapshot expression against synthetic shop and gate documents; login/foreign-host unit cases"
+  },
+  "date": "2026-10-18",
+  "timezone": "UTC",
+  "python": "3.14.8",
+  "localChecks": [
+    "ruff",
+    "pytest",
+    "build",
+    "git diff --check",
+    "outside-source wheel"
+  ],
+  "limitations": [
+    "Windows live only",
+    "read-only bounded samples",
+    "no map/weather query this change"
+  ],
+  "candidateProvenanceScan": {
+    "trackedFiles": 0,
+    "wheel": 0,
+    "sdist": 0
+  }
+}
