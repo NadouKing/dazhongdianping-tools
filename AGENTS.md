@@ -1,5 +1,7 @@
 # Repository instructions
 
+Maintenance ended by owner decision on 2026-10-18. This PR is the final maintenance snapshot pending owner archival. Do not schedule ongoing feature work or re-add it to lazy-trip.
+
 Before any change, read `docs/development-delivery.md`; create/sync the task branch first. Every feature/fix needs relevant live read-only acceptance, updated evidence and a draft PR attached to the chat. Use `.github/PULL_REQUEST_TEMPLATE.md`, handle reviews with `docs/review.md`, and do not merge before the user's explicit request.
 
 This is `dazhongdianping-tools`, an independent Python 3.14 library and `dp` CLI for read-only Dianping collection. Both must install and work alone. Applications may depend on it; business adaptation belongs in the consumer.
@@ -13,7 +15,7 @@ This is `dazhongdianping-tools`, an independent Python 3.14 library and `dp` CLI
 - `browser.py`: owns one exact dedicated Chrome process, profile lock and idempotent cleanup. Never terminate processes by name or attach to a user's daily browser.
 - `errors.py`: typed, credential-safe library errors. Do not return raw Chrome errors, request headers, cookies or signed URLs to CLI users.
 
-Main application imports this package directly. Do not add a dependency on `lazy-trip` or Xiaohongshu tools. Official Amap/weather remains the main application's existing MCP connection.
+Consumer applications may import this package directly; lazy-trip has retired this dependency. Do not add a dependency on `lazy-trip` or Xiaohongshu tools. Official Amap/weather remains the main application's existing MCP connection.
 
 ## Data and session rules
 

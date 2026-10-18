@@ -17,3 +17,9 @@ def test_library_error_reaches_cli_as_json(monkeypatch, capsys):
     output = capsys.readouterr().out
     assert json.loads(output)["error"]["code"] == "invalid_shop_id"
     assert "private" not in output
+
+
+def test_manual_wait_cli_requires_visible_before_start(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["dp", "--verification-wait", "60", "detail", "shop123"])
+    assert main() == 1
+    assert json.loads(capsys.readouterr().out)["error"]["code"] == "visible_browser_required"

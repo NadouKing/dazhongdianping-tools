@@ -1,5 +1,7 @@
 # Deployment and environment
 
+Final maintenance snapshot dated 2026-10-18; no further active maintenance is planned. Archival is left to the owner after reviewing the final PR.
+
 ## Runtime
 
 Use standard CPython 3.14 and uv. The production dependencies are `httpx` and `websockets`. The browser executes the packaged JavaScript itself; Node, Go, Playwright and a separately installed browser automation runtime are not required.
@@ -19,7 +21,7 @@ An integrating application may pin this repository's verified commit/version as 
 1. Run `uv run dp login`. Complete login/verification in the visible dedicated Chrome window; the tool closes it when ready.
 2. Run `uv run dp session`. `state=ready` means the page is accessible; `authenticated` reports known login Cookie presence without returning credentials.
 3. Run searches and exact details. To avoid repeated cold browser starts from scripts, reuse one Python `DianpingClient` across calls.
-4. On `login_required` or `verification_required`, finish the current command and run `login` again. On `profile_busy`, close the actual owner normally. Never delete an active browser's files or kill all Chrome processes.
+4. Search-page login does not guarantee detail access. To complete a gate on the actual detail page, opt in with `dp --visible --verification-wait 180 detail <id>`. The same tab stays open for bounded human interaction; no refresh, re-navigation or automatic solving. A persistent gate returns `verification_timeout`. Default queries still fail immediately. On `profile_busy`, close the actual owner normally. Never delete an active browser's files or kill all Chrome processes.
 
 The webpage can change or restrict access. `parser_unavailable` is deliberately distinguishable from a zero-result search. Saving full browser HTML/network dumps is not part of normal diagnostics.
 

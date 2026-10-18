@@ -220,3 +220,114 @@ def test_navigation_identifies_login_before_parsing():
         assert error.value.code == "login_required"
 
     asyncio.run(run())
+
+
+def test_manual_wait_resumes_same_target_without_second_navigation():
+    async def run():
+        client = client_with_parsed({"id": "shop123", "name": "示例商家"})
+        client.verification_wait = 1
+        calls = []
+
+        async def navigate(*_):
+            calls.append("navigate")
+            raise DianpingError("verification_required", "需要人工验证")
+
+        async def state(*_):
+            calls.append("observe")
+            return {
+                "url": "https://www.dianping.com/shop/shop123",
+                "found": True,
+                "ready": "complete",
+            }
+
+        client._navigate, client._state = navigate, state
+        assert (await client.detail("shop123"))["data"]["id"] == "shop123"
+        assert calls == ["navigate", "observe"]
+
+    asyncio.run(run())
+
+
+def test_late_gate_also_waits_without_reloading():
+    async def run():
+        client = client_with_parsed(None)
+        client.verification_wait = 1
+        snapshots = iter(
+            [
+                {"url": "https://verify.meituan.com/?token=secret"},
+                {
+                    "url": "https://www.dianping.com/shop/shop123",
+                    "data": {"id": "shop123", "name": "人工验证后"},
+                },
+            ]
+        )
+
+        async def evaluate(*_):
+            return next(snapshots)
+
+        async def state(*_):
+            return {
+                "url": "https://www.dianping.com/shop/shop123",
+                "found": True,
+                "ready": "complete",
+            }
+
+        client.browser.cdp.evaluate, client._state = evaluate, state
+        assert (await client.detail("shop123"))["data"]["name"] == "人工验证后"
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("wrong_target", [False, True])
+def test_manual_wait_times_out_on_gate_or_wrong_target(wrong_target):
+    async def run():
+        client = DianpingClient(headless=False, verification_wait=0.01)
+
+        async def navigate(*_):
+            raise DianpingError("verification_required", "需要人工验证")
+
+        async def state(*_):
+            return {
+                "url": "https://www.dianping.com/shop/another"
+                if wrong_target
+                else "https://verify.meituan.com/?token=secret",
+                "found": True,
+                "ready": "complete",
+            }
+
+        client._navigate, client._state = navigate, state
+        with pytest.raises(DianpingError) as error:
+            await client.detail("shop123")
+        assert error.value.code == "verification_timeout"
+        assert "secret" not in str(error.value)
+
+    asyncio.run(run())
+
+
+def test_manual_wait_cancels_slow_state_probe():
+    async def run():
+        client = DianpingClient(headless=False, verification_wait=0.01)
+        cancelled = []
+
+        async def state(*_):
+            try:
+                await asyncio.sleep(5)
+            finally:
+                cancelled.append(True)
+
+        client._state = state
+        with pytest.raises(DianpingError) as error:
+            await client._wait_for_target(
+                "https://www.dianping.com/shop/shop123",
+                "h1",
+                asyncio.get_running_loop().time() + 0.01,
+            )
+        assert error.value.code == "verification_timeout"
+        assert cancelled == [True]
+
+    asyncio.run(run())
+
+
+def test_manual_wait_requires_visible_browser_before_start():
+    with pytest.raises(DianpingError) as error:
+        DianpingClient(verification_wait=60)
+    assert error.value.code == "visible_browser_required"
