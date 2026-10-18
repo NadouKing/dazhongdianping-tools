@@ -1,0 +1,108 @@
+{
+  "type": "read-only-live-acceptance",
+  "notAnOfficialApi": true,
+  "session": {
+    "schemaVersion": 1,
+    "status": "ok",
+    "source": "dianping",
+    "fetchedAt": "2026-10-18T12:46:37.184315Z",
+    "method": "cdp-dom",
+    "elapsedMs": 3381,
+    "data": {
+      "state": "ready",
+      "authenticated": true
+    }
+  },
+  "search": {
+    "schemaVersion": 1,
+    "status": "ok",
+    "source": "dianping",
+    "fetchedAt": "2026-10-18T12:46:38.701735Z",
+    "method": "cdp-dom",
+    "elapsedMs": 1517,
+    "data": {
+      "items": [
+        {
+          "id": "l3zKchidfbeagInV",
+          "name": "Fine day coffee咖啡&精酿",
+          "url": "https://www.dianping.com/shop/l3zKchidfbeagInV",
+          "address": null,
+          "category": "咖啡",
+          "reviewCount": "84 条评价",
+          "averagePrice": "人均 ￥22",
+          "rating": null
+        },
+        {
+          "id": "k47xJlapJ7vOAMob",
+          "name": "RT Coffee 放空咖啡",
+          "url": "https://www.dianping.com/shop/k47xJlapJ7vOAMob",
+          "address": null,
+          "category": "咖啡",
+          "reviewCount": "198 条评价",
+          "averagePrice": "人均 ￥27",
+          "rating": null
+        },
+        {
+          "id": "l8f55CSblPcg7vMy",
+          "name": "OvationCoffee",
+          "url": "https://www.dianping.com/shop/l8f55CSblPcg7vMy",
+          "address": null,
+          "category": "咖啡",
+          "reviewCount": "67 条评价",
+          "averagePrice": "人均 ￥26",
+          "rating": null
+        },
+        {
+          "id": "H2Ic2nhqbjLq6LdW",
+          "name": "未来方洲x及象咖啡·亚洲烧烤夜市Bistro",
+          "url": "https://www.dianping.com/shop/H2Ic2nhqbjLq6LdW",
+          "address": null,
+          "category": "咖啡",
+          "reviewCount": "789 条评价",
+          "averagePrice": "人均 ￥47",
+          "rating": null
+        },
+        {
+          "id": "l5LtqSOzx74CtBOb",
+          "name": "一条猫•Languide Moment 咖啡店",
+          "url": "https://www.dianping.com/shop/l5LtqSOzx74CtBOb",
+          "address": null,
+          "category": "咖啡",
+          "reviewCount": "32 条评价",
+          "averagePrice": "人均 ￥21",
+          "rating": null
+        }
+      ],
+      "count": 5,
+      "hasMore": null
+    }
+  },
+  "detail": {
+    "schemaVersion": 1,
+    "status": "ok",
+    "source": "dianping",
+    "fetchedAt": "2026-10-18T12:46:42.185474Z",
+    "method": "cdp-dom",
+    "elapsedMs": 3484,
+    "data": {
+      "id": "l3zKchidfbeagInV",
+      "url": "https://www.dianping.com/shop/l3zKchidfbeagInV",
+      "name": "Fine day coffee咖啡&精酿",
+      "address": "三多路61号（距大沙东地铁A口400米）",
+      "rating": "4.4",
+      "reviewCount": "84条",
+      "averagePrice": "¥22/人",
+      "openingHours": "次日07:30开始营业",
+      "businessStatus": "休息中",
+      "category": "咖啡",
+      "region": "大沙东",
+      "reviews": [],
+      "reviewsStatus": "not_visible_on_page"
+    }
+  },
+  "limits": [
+    "One search and one exact shop detail; this is not a platform-wide reliability claim.",
+    "Only current rendered page data is read; missing reviews are not zero reviews.",
+    "No private profile path, cookies, request headers or signatures are exported."
+  ]
+}

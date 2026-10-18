@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dazhongdianping-tools"
+version = "0.1.0"
+description = "Read-only Dianping tools using a dedicated local Chrome session and raw CDP"
+readme = "README.md"
+requires-python = ">=3.14"
+license = "MIT"
+authors = [{name = "NadouKing"}]
+dependencies = ["httpx>=0.28,<1", "websockets>=15,<18"]
+
+[project.scripts]
+dp = "dazhongdianping_tools.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.4,<10", "ruff>=0.13,<1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dazhongdianping_tools"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
