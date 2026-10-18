@@ -1,5 +1,7 @@
 # Repository instructions
 
+Before any change, read `docs/development-delivery.md`; create/sync the task branch first. Every feature/fix needs relevant live read-only acceptance, updated evidence and a draft PR attached to the chat. Use `.github/PULL_REQUEST_TEMPLATE.md`, handle reviews with `docs/review.md`, and do not merge before the user's explicit request.
+
 This is `dazhongdianping-tools`, an independent Python 3.14 package and `dp` CLI for read-only Dianping collection. It is a library dependency of `lazy-trip`, not an agent host or map/weather provider.
 
 ## Boundaries and layers

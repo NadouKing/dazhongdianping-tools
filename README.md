@@ -110,6 +110,8 @@ uv build
 
 ## 参考与许可
 
+每次改动按[开发与PR交付](docs/development-delivery.md)建分支、验证并提交草稿PR，审查见[处理规则](docs/review.md)。本轮保持运行能力不变，其他项目的候选能力见[维护检查](docs/upstream-review-2026-10-18.md)。
+
 工程分层、`src` 布局和 wheel 验收流程参考 [seller-ops-automation](https://github.com/DouNineGo/seller-ops-automation)；平台读取经验参考 [dp-mcp](https://github.com/qianwj/dp-mcp) 和本地当天往返工具验证基线。本项目独立实现 Python 传输和生命周期，没有引入电商业务或 Node/Playwright 运行时。
 
 MIT License。Chrome、平台网页和账号权限各自遵循原提供方条款。
